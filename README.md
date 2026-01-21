@@ -24,10 +24,14 @@ Use it if you want.
 ```
 ./cpc200_website.sh install 192.168.43.1
 ```
+Copies new webste .tar to adapter tmp storage and removes all Original Website related files, places new website files, and reboots adapter. 
+
 #### Restore OEM website  
 ```
   ./cpc200_website.sh restore 192.168.43.1
 ```
+Copies old website .tar to adapter tmp storage and removes all files related to the new webstie. Restores the original website and reboots adapter.
+
 ![Dashboard](screenshots/1.Dashboard.PNG)![Devices](screenshots/2.Devices.PNG)
 
 ![Audio](screenshots/3.Audio.png)![Video](screenshots/4.Video.png)
