@@ -11,9 +11,12 @@
         <!-- Header -->
         <header class="header">
             <h1>CPC200-CCPA</h1>
-            <div class="status" id="connectionStatus">
-                <span class="status-dot"></span>
-                <span class="status-text">Loading...</span>
+            <div class="header-right">
+                <button class="btn btn-sm" onclick="App.refreshAll()" title="Reload all settings from adapter">Refresh</button>
+                <div class="status" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Loading...</span>
+                </div>
             </div>
         </header>
 
@@ -26,6 +29,7 @@
             <button class="tab" data-tab="connection">Connection</button>
             <button class="tab" data-tab="identity">Identity</button>
             <button class="tab" data-tab="info">Info</button>
+            <button class="tab" data-tab="config">Config</button>
             <button class="tab" data-tab="system">System</button>
         </nav>
 
@@ -101,33 +105,33 @@
                         <label>Media Delay (ms) *</label>
                         <input type="number" id="mediaDelay" min="300" max="2000" step="50">
                         <button class="btn btn-sm" onclick="App.setSetting('mediaDelay', 'mediaDelay')">Set</button>
-                        <p class="setting-hint">Audio-video sync delay. Increase if audio is ahead of video</p>
+                        <p class="setting-hint">Audio-video sync buffer in ms. Firmware default is 1000. Increase if audio leads video</p>
                     </div>
 
                     <div class="setting">
                         <label>Audio Quality *</label>
                         <div class="toggle-group">
-                            <button class="toggle" data-key="mediaSound" data-value="0">CD (44.1kHz)</button>
-                            <button class="toggle" data-key="mediaSound" data-value="1">DVD (48kHz)</button>
+                            <button class="toggle" data-key="mediaSound" data-value="0">44.1 kHz</button>
+                            <button class="toggle" data-key="mediaSound" data-value="1">48 kHz</button>
                         </div>
-                        <p class="setting-hint">Sample rate for audio output. DVD is higher quality</p>
+                        <p class="setting-hint">Audio sample rate. 48 kHz is higher quality (firmware default)</p>
                     </div>
 
                     <div class="setting">
                         <label>Echo Delay (ms) *</label>
                         <input type="number" id="echoDelay" min="20" max="2000" step="10">
                         <button class="btn btn-sm" onclick="App.setSetting('echoDelay', 'echoDelay')">Set</button>
-                        <p class="setting-hint">Echo cancellation delay for hands-free calls</p>
+                        <p class="setting-hint">Echo cancellation delay for hands-free calls. Default 320 is a sentinel enabling two-mode AEC</p>
                     </div>
 
                     <div class="setting">
-                        <label>Call Quality * (Buggy - may not work)</label>
+                        <label>Call Quality * <span class="badge" style="background:#c62828">Firmware Bug</span></label>
                         <div class="toggle-group">
-                            <button class="toggle" data-key="callQuality" data-value="0">Normal</button>
-                            <button class="toggle" data-key="callQuality" data-value="1">Clear</button>
-                            <button class="toggle" data-key="callQuality" data-value="2">HD</button>
+                            <button class="toggle" data-key="CallQuality" data-value="0">Normal</button>
+                            <button class="toggle" data-key="CallQuality" data-value="1">Clear</button>
+                            <button class="toggle" data-key="CallQuality" data-value="2">HD</button>
                         </div>
-                        <p class="setting-hint">Voice call audio quality. Known firmware bug may ignore this</p>
+                        <p class="setting-hint">Firmware bug: CallQuality does not update VoiceQuality (the key that actually controls behavior). This setting has no effect</p>
                     </div>
 
                     <div class="setting">
@@ -137,13 +141,14 @@
                         <p class="setting-hint">Navigation voice prompt volume level</p>
                     </div>
 
-                    <div class="setting restored">
-                        <label>Mic Type * <span class="badge">Restored</span></label>
+                    <div class="setting">
+                        <label>Mic Type *</label>
                         <div class="toggle-group">
                             <button class="toggle" data-key="micType" data-value="0">Car Mic</button>
+                            <button class="toggle" data-key="micType" data-value="1">Adapter Mic</button>
                             <button class="toggle" data-key="micType" data-value="2">Phone Mic</button>
                         </div>
-                        <p class="setting-hint">Microphone source for calls. Car uses head unit mic</p>
+                        <p class="setting-hint">Microphone source: 0=head unit mic, 1=adapter built-in mic, 2=phone mic</p>
                     </div>
 
                     <div class="setting">
@@ -170,41 +175,17 @@
                         <p class="setting-hint">Screen density. Higher values make UI elements smaller</p>
                     </div>
 
-                    <div class="setting">
-                        <label>Display Size</label>
-                        <div class="toggle-group">
-                            <button class="toggle" data-key="displaySize" data-value="0">Auto</button>
-                            <button class="toggle" data-key="displaySize" data-value="1">Small</button>
-                            <button class="toggle" data-key="displaySize" data-value="2">Medium</button>
-                            <button class="toggle" data-key="displaySize" data-value="3">Large</button>
-                        </div>
-                        <p class="setting-hint">UI scaling size for CarPlay/Android Auto interface</p>
-                    </div>
+                    <!-- DisplaySize: PASS-THROUGH (server.cgi only, no firmware effect) - removed -->
 
                     <div class="setting">
                         <label>Video Bit Rate</label>
                         <input type="number" id="bitRate" min="0" max="20" step="1">
                         <button class="btn btn-sm" onclick="App.setSetting('bitRate', 'bitRate')">Set</button>
-                        <p class="setting-hint">Video encoding quality. Higher = better quality but more bandwidth</p>
+                        <p class="setting-hint">Bitrate level requested from phone. Higher = better quality but more bandwidth. 0 = auto</p>
                     </div>
 
-                    <div class="setting restored">
-                        <label>Mouse Mode <span class="badge">Restored</span></label>
-                        <div class="toggle-group">
-                            <button class="toggle" data-key="mouseMode" data-value="0">Direct Touch</button>
-                            <button class="toggle" data-key="mouseMode" data-value="1">Cursor</button>
-                        </div>
-                        <p class="setting-hint">Touch input mode. Cursor shows a pointer for non-touch screens</p>
-                    </div>
-
-                    <div class="setting restored">
-                        <label>Knob Mode <span class="badge">Restored</span></label>
-                        <div class="toggle-group">
-                            <button class="toggle" data-key="KnobMode" data-value="0">Off</button>
-                            <button class="toggle" data-key="KnobMode" data-value="1">On</button>
-                        </div>
-                        <p class="setting-hint">Enable rotary knob/dial navigation for head units with knob controls</p>
-                    </div>
+                    <!-- MouseMode: PASS-THROUGH (server.cgi only, no firmware effect) - removed -->
+                    <!-- KnobMode: PASS-THROUGH (server.cgi only, no firmware effect) - removed -->
 
                     <div class="setting">
                         <label>Background Mode *</label>
@@ -212,17 +193,10 @@
                             <button class="toggle" data-key="bgMode" data-value="0">Show UI</button>
                             <button class="toggle" data-key="bgMode" data-value="1">Hide UI</button>
                         </div>
-                        <p class="setting-hint">Show or hide CarPlay UI when running in background</p>
+                        <p class="setting-hint">Background UI behavior. Exact effect unconfirmed</p>
                     </div>
 
-                    <div class="setting">
-                        <label>Improved Fluency</label>
-                        <div class="toggle-group">
-                            <button class="toggle" data-key="ImprovedFluency" data-value="0">Off</button>
-                            <button class="toggle" data-key="ImprovedFluency" data-value="1">On</button>
-                        </div>
-                        <p class="setting-hint">Optimize video streaming for smoother playback</p>
-                    </div>
+                    <!-- ImprovedFluency: PASS-THROUGH (server.cgi only, verified dead via full decompilation scan) - removed -->
                 </div>
             </section>
 
@@ -253,10 +227,10 @@
                     <div class="setting">
                         <label>Fast Connect</label>
                         <div class="toggle-group">
-                            <button class="toggle" data-key="FastConnect" data-value="0">Off</button>
-                            <button class="toggle" data-key="FastConnect" data-value="1">On</button>
+                            <button class="toggle" data-key="fastConnect" data-value="0">Off</button>
+                            <button class="toggle" data-key="fastConnect" data-value="1">On</button>
                         </div>
-                        <p class="setting-hint">Skip some handshake steps for faster connection</p>
+                        <p class="setting-hint">Reconnect faster to last paired device. Requires Auto Connect on and a previously paired device</p>
                     </div>
 
                     <div class="setting">
@@ -289,23 +263,16 @@
                         <p class="setting-hint">Delay before starting CarPlay after connection</p>
                     </div>
 
-                    <div class="setting restored">
-                        <label>GPS from Head Unit * <span class="badge">Restored</span></label>
+                    <div class="setting">
+                        <label>GPS Forwarding *</label>
                         <div class="toggle-group">
                             <button class="toggle" data-key="gps" data-value="0">Off</button>
                             <button class="toggle" data-key="gps" data-value="1">On</button>
                         </div>
-                        <p class="setting-hint">Use car's GPS instead of phone GPS for navigation</p>
+                        <p class="setting-hint">CarPlay only. Forward head unit GPS to phone via iAP2. Phone fuses both sources (best-accuracy-wins). Requires GNSSCapability > 0 from host app. Android Auto has a firmware bug in this path</p>
                     </div>
 
-                    <div class="setting restored">
-                        <label>USB Disk Passthrough <span class="badge">Restored</span></label>
-                        <div class="toggle-group">
-                            <button class="toggle" data-key="Udisk" data-value="0">Off</button>
-                            <button class="toggle" data-key="Udisk" data-value="1">On</button>
-                        </div>
-                        <p class="setting-hint">Allow head unit to access USB drive connected to adapter</p>
-                    </div>
+                    <!-- UDiskPassThrough: DEAD (zero runtime xrefs across all 6 binaries) - removed -->
 
                     <div class="setting">
                         <label>Advanced Features</label>
@@ -313,7 +280,7 @@
                             <button class="toggle" data-key="AdvancedFeatures" data-value="0">Off</button>
                             <button class="toggle" data-key="AdvancedFeatures" data-value="1">On</button>
                         </div>
-                        <p class="setting-hint">Unknown effect. Purpose not yet discovered</p>
+                        <p class="setting-hint">Gates naviScreenInfo on adapter side. Not required if host app sends navigation video parameters (resolution, refresh rate) directly via BoxSettings. May increase CPU/memory usage when enabled</p>
                     </div>
                 </div>
             </section>
@@ -348,8 +315,8 @@
                     <div class="setting">
                         <label>Custom Car Logo</label>
                         <div class="toggle-group">
-                            <button class="toggle" data-key="customCarLogo" data-value="0">Default</button>
-                            <button class="toggle" data-key="customCarLogo" data-value="1">Custom</button>
+                            <button class="toggle" data-key="CustomCarLogo" data-value="0">Default</button>
+                            <button class="toggle" data-key="CustomCarLogo" data-value="1">Custom</button>
                         </div>
                         <p class="setting-hint">Use a custom boot logo instead of the default manufacturer logo</p>
                     </div>
@@ -380,6 +347,30 @@
                 </div>
             </section>
 
+            <!-- Config Tab -->
+            <section id="config" class="tab-content">
+                <div class="card">
+                    <div class="config-header">
+                        <h2>Full Configuration Dump</h2>
+                        <button class="btn btn-sm" onclick="App.loadFullConfig()">Refresh Config</button>
+                    </div>
+                    <p class="note">All 106 riddleBoxCfg keys. Read-only view of adapter state. Updated on page load or manual refresh.</p>
+                    <div class="config-legend">
+                        <span class="badge badge-alive">ALIVE</span> Runtime effect
+                        <span class="badge badge-dead">DEAD</span> No code xrefs
+                        <span class="badge badge-pass">PASS-THROUGH</span> server.cgi only
+                    </div>
+                    <div class="config-legend">
+                        <span class="val-label val-unset-label">unset</span> Never configured (normal)
+                        <span class="val-label val-unavail-label">unavailable</span> Read failed
+                        <span class="val-label val-error-label">read error</span> Unexpected failure
+                    </div>
+                    <div id="configDump" class="config-dump">
+                        <p class="loading">Click Refresh Config to load...</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- System Tab -->
             <section id="system" class="tab-content">
                 <div class="card">
@@ -387,11 +378,9 @@
 
                     <div class="setting">
                         <label>CPU Governor</label>
-                        <select id="cpuGovernor" onchange="App.setGovernor(this.value)">
-                            <option value="ondemand">On Demand</option>
-                            <option value="performance">Performance</option>
-                            <option value="powersave">Power Save</option>
-                        </select>
+                        <select id="cpuGovernor"></select>
+                        <button class="btn btn-sm" onclick="App.setGovernor(document.getElementById('cpuGovernor').value)">Apply</button>
+                        <p class="setting-hint">Takes effect immediately, no reboot required. Resets to default on reboot</p>
                     </div>
 
                     <div class="setting">
@@ -430,7 +419,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <span>CPC200-CCPA Custom Web Interface v1.0</span>
+            <span>CPC200-CCPA Custom Web Interface v2.0</span>
         </footer>
 
         <!-- Toast Notification -->

@@ -234,7 +234,7 @@ const API = {
         var formData = new FormData();
         formData.append('file', file, filename);
 
-        fetch(this.baseUrl + '/upload.cgi', {
+        fetch(this.baseUrl + '/cgi-bin/upload.cgi', {
             method: 'POST',
             body: formData
         })
