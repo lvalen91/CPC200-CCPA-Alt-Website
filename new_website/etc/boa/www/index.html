@@ -124,15 +124,9 @@
                         <p class="setting-hint">Echo cancellation delay for hands-free calls. Default 320 is a sentinel enabling two-mode AEC</p>
                     </div>
 
-                    <div class="setting">
-                        <label>Call Quality * <span class="badge" style="background:#c62828">Firmware Bug</span></label>
-                        <div class="toggle-group">
-                            <button class="toggle" data-key="CallQuality" data-value="0">Normal</button>
-                            <button class="toggle" data-key="CallQuality" data-value="1">Clear</button>
-                            <button class="toggle" data-key="CallQuality" data-value="2">HD</button>
-                        </div>
-                        <p class="setting-hint">Firmware bug: CallQuality does not update VoiceQuality (the key that actually controls behavior). This setting has no effect</p>
-                    </div>
+                    <!-- CallQuality removed: firmware bug (CallQuality doesn't update VoiceQuality),
+                         and VoiceQuality itself has no effect on CarPlay (iPhone controls audio format via AirPlay).
+                         Only relevant for Android Auto HFP Bluetooth codec negotiation. -->
 
                     <div class="setting">
                         <label>Nav Volume *</label>

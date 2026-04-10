@@ -201,14 +201,13 @@ const App = {
     // Update toggle button states based on settings
     updateToggles: function() {
         // Map HTML data-key to settings keys
-        // infos API returns: mediaSound, CallQuality, autoConn, autoPlay
+        // infos API returns: mediaSound, autoConn, autoPlay (CallQuality removed — no effect on CarPlay)
         // config.cgi returns: MicType, BtAudio, BackgroundMode, HudGPSSwitch,
         //                     FastConnect, AdvancedFeatures, CustomCarLogo
         // Removed DEAD: UDiskPassThrough | Removed PASS-THROUGH: ImprovedFluency, KnobMode, MouseMode, DisplaySize
         var s = this.settings;
         var mappings = {
             'mediaSound': s.mediaSound,
-            'CallQuality': s.CallQuality,
             'micType': s.MicType,
             'BtAudio': s.BtAudio,
             'bgMode': s.BackgroundMode,
@@ -323,7 +322,7 @@ const App = {
         // 'bgMode' → server.cgi field 'bgMode' (maps to BackgroundMode internally)
         // 'autoConn' → server.cgi field 'autoConn' (maps to NeedAutoConnect internally)
         // 'autoPlay' → server.cgi field 'autoPlay' (maps to AutoPlauMusic internally)
-        // 'CallQuality' → server.cgi field 'CallQuality' (direct match)
+        // CallQuality removed — firmware bug + no effect on CarPlay audio (iPhone controls format via AirPlay)
     },
 
     // Keys not in server.cgi's 48-field API — must be set via riddleBoxCfg (config.cgi POST)
@@ -791,8 +790,8 @@ const App = {
         NaviAudio:                  {d:0,  min:0,max:2,     s:'A',c:'audio',   n:'Navigation audio mixing mode — controls how nav voice prompts are combined with media audio on the USB output.', v:{0:'Mixed with media (single stream)',1:'Separate USB channel (dual-stream)',2:'Adapter-side ducking (attenuate media during nav)'}},
         ScreenPhysicalW:            {d:0,  min:0,max:1000,  s:'A',c:'display', n:'Display width in mm (AirPlay)', v:{0:'Auto'}},
         ScreenPhysicalH:            {d:0,  min:0,max:1000,  s:'A',c:'display', n:'Display height in mm (AirPlay)', v:{0:'Auto'}},
-        CallQuality:                {d:1,  min:0,max:2,     s:'A',c:'audio',   n:'Call quality (BUG: does not update VoiceQuality)', v:{0:'Normal (8kHz NB)',1:'Clear (16kHz WB)',2:'HD (reserved)'}},
-        VoiceQuality:               {d:1,  min:0,max:2,     s:'A',c:'audio',   n:'Voice recognition quality (actual control)', v:{0:'Normal (8kHz NB)',1:'Clear (16kHz WB)',2:'HD (32kHz SWB)'}},
+        CallQuality:                {d:1,  min:0,max:2,     s:'D',c:'audio',   n:'Call quality — REMOVED from UI. Firmware bug: does not update VoiceQuality. VoiceQuality itself only affects AA HFP codec, not CarPlay (iPhone controls format via AirPlay)', v:{0:'Normal (8kHz NB)',1:'Clear (16kHz WB)',2:'HD (reserved)'}},
+        VoiceQuality:               {d:1,  min:0,max:2,     s:'D',c:'audio',   n:'Voice/call quality (AA HFP only). No effect on CarPlay — iPhone sends 16kHz wideband regardless', v:{0:'Normal (8kHz NB)',1:'Clear (16kHz WB)',2:'HD (32kHz SWB)'}},
         AutoUpdate:                 {d:1,  min:0,max:1,     s:'A',c:'system',  n:'OTA auto-update', v:{0:'Disabled',1:'Enabled'}},
         LastBoxUIType:              {d:1,  min:0,max:2,     s:'D',c:'system',  n:'Last session type (vestigial)', v:{0:'None',1:'CarPlay',2:'Android Auto'}},
         BoxSupportArea:             {d:0,  min:0,max:1,     s:'A',c:'system',  n:'Region flag — affects iAP2 identification params', v:{0:'Global (default)',1:'China (zh lang hint, HiCar context)'}},

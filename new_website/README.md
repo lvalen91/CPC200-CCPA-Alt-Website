@@ -19,7 +19,7 @@ A minimal, lightweight replacement for the OEM Vue.js web interface. This replac
 ## Features
 
 ### Settings (Full Parity + Restored Hidden Settings)
-- **Audio:** Media Delay, Audio Quality, Echo Delay, Call Quality, Nav Volume, Mic Type*, Audio Source*
+- **Audio:** Media Delay, Audio Quality, Echo Delay, Nav Volume, Mic Type*, Audio Source*
 - **Video:** Screen DPI, Display Size, Bit Rate, Mouse Mode*, Knob Mode*, Background Mode*, Improved Fluency*
 - **Connection:** Auto Connect, Auto Play, Fast Connect*, WiFi Channel, Start Delay, GPS*, USB Passthrough*, Advanced Features*
 - **Identity:** WiFi Name, Bluetooth Name, Box Name, Custom Car Logo
@@ -158,7 +158,7 @@ Settings marked with `*` in the UI may be overridden by the host app (CarPlay/An
 The Devices tab shows **saved/paired wireless devices** from `DevList`, not the currently active USB connection. This is the same behavior as the OEM website. The currently active connection (CarPlay/Android Auto) is shown on the Dashboard via `BoxMonitor.MDLinkType`.
 
 ### Known Firmware Bugs
-- **CallQuality**: Setting has no effect due to firmware bug
+- **CallQuality**: Removed from UI. Firmware bug (CallQuality doesn't update VoiceQuality), and VoiceQuality itself has no effect on CarPlay — iPhone controls audio format via AirPlay (always 16kHz WB). Only relevant for AA HFP Bluetooth codec negotiation.
 - **AutoPlauMusic**: Firmware uses typo "Plau" instead of "Play"
 
 ### Security
