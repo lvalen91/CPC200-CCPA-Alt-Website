@@ -32,8 +32,8 @@ Copies new webste .tar to adapter tmp storage and removes all Original Website r
 ```
 Copies old website .tar to adapter tmp storage and removes all files related to the new webstie. Restores the original website and reboots adapter.
 
-![Dashboard](screenshots/1.Dashboard.png)
-![Devices](screenshots/2.Devices.png)
+![Dashboard](screenshots/1.Dashboard.PNG)
+![Devices](screenshots/2.Devices.PNG)
 ![Audio](screenshots/3.Audio.png)
 ![Video](screenshots/4.Video.png)
 ![Connection](screenshots/5.Connection.png)
