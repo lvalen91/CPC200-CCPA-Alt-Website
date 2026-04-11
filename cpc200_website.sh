@@ -144,7 +144,9 @@ do_install() {
 
         echo "Extracting archive..."
         cd /tmp
-        tar -xzf new_website.tar.gz
+        rm -rf /tmp/new_website
+        mkdir -p /tmp/new_website
+        tar -xzf new_website.tar.gz -C /tmp/new_website
 
         echo "Removing OEM website files..."
         rm -rf /etc/boa/www/js/*.js.gz /etc/boa/www/js/*.js 2>/dev/null || true
