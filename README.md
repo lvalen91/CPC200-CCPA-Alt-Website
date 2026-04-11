@@ -1,7 +1,7 @@
 # CPC200-CCPA-Alt-Webstire
 Replacement website for the CPC200-CCPA with a CFW
 
-With a Carlinkit CPC200-CCPA Adapter running a custom firmware of 2025.10 release [Like this CFW](https://github.com/lvalen91/CPC200-CCPA-Firmware-Dump/tree/main/custom_firmware/2025.10.15.1127)
+With a Carlinkit CPC200-CCPA Adapter running a custom firmware of 2025.10 release. As long as ssh to adapter is available [Like this CFW](https://github.com/lvalen91/CPC200-CCPA-Firmware-Dump/tree/main/custom_firmware/2025.10.15.1127)
 
 Use the script to install this website which completely replaces the original.
 
@@ -32,10 +32,10 @@ Copies new webste .tar to adapter tmp storage and removes all Original Website r
 ```
 Copies old website .tar to adapter tmp storage and removes all files related to the new webstie. Restores the original website and reboots adapter.
 
-![Dashboard](screenshots/1.Dashboard.PNG)![Devices](screenshots/2.Devices.PNG)
-
-![Audio](screenshots/3.Audio.png)![Video](screenshots/4.Video.png)
-
-![Connection](screenshots/5.Connection.png)![Identity](screenshots/6.Identity.PNG)
-
-![Info](screenshots/7.Info.PNG)![System](screenshots/8.System.PNG)
+![Dashboard](screenshots/1.Dashboard.png)
+![Devices](screenshots/2.Devices.png)
+![Audio](screenshots/3.Audio.png)
+![Video](screenshots/4.Video.png)
+![Connection](screenshots/5.Connection.png)
+![Identity](screenshots/6.Identity.PNG)
+![Info](screenshots/7.Info.PNG)![System](screenshots/7.System.png)

@@ -101,7 +101,7 @@ const App = {
                 // Removed PASS-THROUGH: ImprovedFluency, KnobMode, MouseMode (server.cgi only, no firmware effect)
                 var extendedKeys = [
                     'MicType', 'BtAudio', 'BackgroundMode', 'HudGPSSwitch',
-                    'FastConnect', 'AdvancedFeatures', 'CustomCarLogo'
+                    'FastConnect', 'AdvancedFeatures', 'CustomCarLogo', 'UdiskMode'
                 ];
                 extendedKeys.forEach(key => {
                     if (config[key] !== undefined) {
@@ -215,6 +215,7 @@ const App = {
             'autoPlay': s.autoPlay,
             'fastConnect': s.FastConnect,
             'gps': s.HudGPSSwitch,
+            'UdiskMode': s.UdiskMode,
             'AdvancedFeatures': s.AdvancedFeatures,
             'CustomCarLogo': s.CustomCarLogo
         };
@@ -326,7 +327,7 @@ const App = {
     },
 
     // Keys not in server.cgi's 48-field API — must be set via riddleBoxCfg (config.cgi POST)
-    configCgiKeys: ['AdvancedFeatures', 'CustomCarLogo'],
+    configCgiKeys: ['AdvancedFeatures', 'CustomCarLogo', 'UdiskMode'],
 
     // Set toggle value
     setToggle: function(key, val, element) {

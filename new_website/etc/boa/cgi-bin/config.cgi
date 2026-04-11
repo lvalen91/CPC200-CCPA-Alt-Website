@@ -38,7 +38,7 @@ get_arr() {
 # Only keys NOT in server.cgi's API belong here
 is_allowed_key() {
     case "$1" in
-        AdvancedFeatures|CustomCarLogo) return 0 ;;
+        AdvancedFeatures|CustomCarLogo|UdiskMode) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -130,6 +130,7 @@ echo "\"BtAudio\":$(get_val BtAudio),"
 echo "\"BackgroundMode\":$(get_val BackgroundMode),"
 echo "\"HudGPSSwitch\":$(get_val HudGPSSwitch),"
 echo "\"FastConnect\":$(get_val FastConnect),"
+echo "\"UdiskMode\":$(get_val UdiskMode),"
 echo "\"AdvancedFeatures\":$(get_val AdvancedFeatures),"
 echo "\"CustomCarLogo\":$(get_val CustomCarLogo)"
 echo "}"

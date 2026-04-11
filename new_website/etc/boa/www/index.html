@@ -124,10 +124,6 @@
                         <p class="setting-hint">Echo cancellation delay for hands-free calls. Default 320 is a sentinel enabling two-mode AEC</p>
                     </div>
 
-                    <!-- CallQuality removed: firmware bug (CallQuality doesn't update VoiceQuality),
-                         and VoiceQuality itself has no effect on CarPlay (iPhone controls audio format via AirPlay).
-                         Only relevant for Android Auto HFP Bluetooth codec negotiation. -->
-
                     <div class="setting">
                         <label>Nav Volume *</label>
                         <input type="range" id="naviVolume" min="0" max="100" step="5">
@@ -267,6 +263,15 @@
                     </div>
 
                     <!-- UDiskPassThrough: DEAD (zero runtime xrefs across all 6 binaries) - removed -->
+
+                    <div class="setting">
+                        <label>USB Disk Mode</label>
+                        <div class="toggle-group">
+                            <button class="toggle" data-key="UdiskMode" data-value="0">Off</button>
+                            <button class="toggle" data-key="UdiskMode" data-value="1">On</button>
+                        </div>
+                        <p class="setting-hint">USB mass storage gadget. Exposes 8MB RAM FAT32 with BoxHelper.apk via f_mass_storage. WARNING: interferes with Android Auto</p>
+                    </div>
 
                     <div class="setting">
                         <label>Advanced Features</label>
