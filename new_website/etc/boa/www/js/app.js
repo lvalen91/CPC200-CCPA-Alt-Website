@@ -318,7 +318,9 @@ const App = {
     // server.cgi accepts JSON field names (gps, bgMode, autoConn, autoPlay, etc.)
     // NOT config key names (HudGPSSwitch, BackgroundMode, NeedAutoConnect, etc.)
     keyMap: {
-        // No overrides needed — HTML data-keys already match server.cgi JSON field names
+        // HTML data-key 'UdiskMode' → server.cgi UI field 'Udisk' (maps to UdiskMode config key internally)
+        // server.cgi handles persistence (--upConfig) and side-effects; raw config.cgi -s does not.
+        'UdiskMode': 'Udisk',
         // 'gps' → server.cgi field 'gps' (maps to HudGPSSwitch internally)
         // 'bgMode' → server.cgi field 'bgMode' (maps to BackgroundMode internally)
         // 'autoConn' → server.cgi field 'autoConn' (maps to NeedAutoConnect internally)
@@ -327,7 +329,7 @@ const App = {
     },
 
     // Keys not in server.cgi's 48-field API — must be set via riddleBoxCfg (config.cgi POST)
-    configCgiKeys: ['AdvancedFeatures', 'CustomCarLogo', 'UdiskMode'],
+    configCgiKeys: ['AdvancedFeatures', 'CustomCarLogo'],
 
     // Set toggle value
     setToggle: function(key, val, element) {
