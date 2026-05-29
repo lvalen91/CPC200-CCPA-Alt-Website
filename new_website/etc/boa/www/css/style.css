@@ -673,6 +673,119 @@ input[type="file"] {
     margin-top: 20px;
 }
 
+/* Terminal */
+.term-output {
+    background: #000;
+    border: 1px solid #1a1a1a;
+    border-radius: 4px;
+    padding: 10px;
+    height: 360px;
+    overflow-y: auto;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #cfcfcf;
+}
+
+.term-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.term-line.term-cmd {
+    color: #8888cc;
+}
+
+.term-line.term-err {
+    color: #ef5350;
+}
+
+.term-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.term-prompt {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: #8888cc;
+    white-space: nowrap;
+}
+
+.term-input {
+    flex: 1;
+    width: auto;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    background: #000;
+    border: 1px solid #333;
+    color: #e0e0e0;
+    border-radius: 4px;
+}
+
+.term-input:focus {
+    border-color: #4a4a8a;
+    outline: none;
+}
+
+.term-input:disabled {
+    opacity: 0.5;
+}
+
+/* Terminal danger warning gate */
+.term-warning {
+    border: 1px solid #b71c1c;
+    background: #160606;
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+}
+
+.term-warning-icon {
+    font-size: 32px;
+    line-height: 1;
+    color: #ef5350;
+    margin-bottom: 8px;
+}
+
+.term-warning h3 {
+    color: #ef5350;
+    font-size: 16px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.term-warning p {
+    color: #cbb;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 560px;
+    margin: 0 auto 12px;
+}
+
+.term-warning ul {
+    text-align: left;
+    max-width: 560px;
+    margin: 0 auto 16px;
+    padding-left: 20px;
+    color: #a99;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.term-warning code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    color: #ffab40;
+    background: #1a1200;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .stats-grid {

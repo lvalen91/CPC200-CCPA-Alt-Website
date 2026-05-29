@@ -8,12 +8,17 @@ const App = {
     lastRx: 0,
     lastTx: 0,
 
+    // Terminal state — cwd persists between commands (term.cgi is stateless,
+    // so we echo the returned directory back on the next request).
+    term: { cwd: '/', history: [], histIndex: 0, busy: false, acked: false },
+
     // Initialize application
     init: function() {
         console.log('[App] init called');
         this.setupTabs();
         this.setupToggles();
         this.setupRangeInputs();
+        this.setupTerminal();
         console.log('[App] Setup complete, calling loadData');
         this.loadData();
 
@@ -719,6 +724,167 @@ const App = {
             .catch(() => {
                 document.getElementById('wifiClients').innerHTML = '<p>Failed to load</p>';
             });
+    },
+
+    // ---- Terminal ----------------------------------------------------------
+
+    // Wire up the terminal input (Enter to run, Up/Down for history)
+    setupTerminal: function() {
+        var input = document.getElementById('termInput');
+        var form = document.getElementById('termForm');
+        if (!input || !form) return;
+        var self = this;
+
+        // Run on Enter / on-screen keyboard "Go" / the Run button. The form's
+        // submit event is far more reliable than a keydown handler on iOS
+        // Safari, where Return often doesn't emit a usable keydown.
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            self.runCommand(input.value);
+            input.value = '';
+        });
+
+        // Arrow keys recall command history (desktop convenience).
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                self.recallHistory(-1, input);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                self.recallHistory(1, input);
+            }
+        });
+        // Focus the input whenever the Terminal tab is opened (once enabled)
+        document.querySelectorAll('.tab[data-tab="terminal"]').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                if (self.term.acked) setTimeout(function() { input.focus(); }, 0);
+            });
+        });
+        this.setTermPrompt();
+    },
+
+    // Dismiss the danger warning and reveal the terminal (once per page load)
+    ackTerminal: function() {
+        this.term.acked = true;
+        var warn = document.getElementById('termWarning');
+        var body = document.getElementById('termBody');
+        if (warn) warn.style.display = 'none';
+        if (body) body.style.display = 'block';
+        var input = document.getElementById('termInput');
+        if (input) input.focus();
+    },
+
+    // Step through command history with the arrow keys
+    recallHistory: function(dir, input) {
+        var h = this.term.history;
+        if (!h.length) return;
+        this.term.histIndex += dir;
+        if (this.term.histIndex < 0) this.term.histIndex = 0;
+        if (this.term.histIndex >= h.length) {
+            this.term.histIndex = h.length;
+            input.value = '';
+            return;
+        }
+        input.value = h[this.term.histIndex];
+    },
+
+    setTermPrompt: function() {
+        var p = document.getElementById('termPrompt');
+        if (p) p.textContent = this.term.cwd + ' #';
+    },
+
+    // Append a line/block to the terminal output, optionally styled
+    appendTerm: function(text, cls) {
+        var out = document.getElementById('termOutput');
+        if (!out) return;
+        var div = document.createElement('div');
+        div.className = 'term-line' + (cls ? ' ' + cls : '');
+        div.textContent = text;
+        out.appendChild(div);
+        out.scrollTop = out.scrollHeight;
+    },
+
+    clearTerminal: function() {
+        var out = document.getElementById('termOutput');
+        if (out) out.innerHTML = '';
+    },
+
+    // Send a command to term.cgi and render the result
+    runCommand: function(cmd) {
+        if (this.term.busy) {
+            this.toast('A command is still running', 'error');
+            return;
+        }
+        cmd = (cmd || '').replace(/\s+$/, '');
+        // Echo the prompt + command into the scrollback
+        this.appendTerm(this.term.cwd + ' # ' + cmd, 'term-cmd');
+        if (cmd === '') { return; }
+
+        // Client-side `clear` so it behaves like a real shell
+        if (cmd === 'clear') { this.clearTerminal(); return; }
+
+        // Record history
+        this.term.history.push(cmd);
+        this.term.histIndex = this.term.history.length;
+
+        this.term.busy = true;
+        var self = this;
+        var input = document.getElementById('termInput');
+        if (input) input.disabled = true;
+
+        // Abort hung requests (interactive/long-running commands) after 60s
+        var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timer = setTimeout(function() { if (controller) controller.abort(); }, 60000);
+
+        // Body: line 1 = working directory, remaining = command
+        var body = this.term.cwd + '\n' + cmd;
+
+        fetch('/cgi-bin/term.cgi', {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: body,
+            signal: controller ? controller.signal : undefined
+        })
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                clearTimeout(timer);
+                self.renderCommandResult(text);
+            })
+            .catch(function(err) {
+                clearTimeout(timer);
+                if (err && err.name === 'AbortError') {
+                    self.appendTerm('[aborted after 60s — command still running on adapter]', 'term-err');
+                } else {
+                    self.appendTerm('[request failed: ' + (err && err.message ? err.message : err) + ']', 'term-err');
+                }
+            })
+            .then(function() {
+                self.term.busy = false;
+                if (input) { input.disabled = false; input.focus(); }
+            });
+    },
+
+    // Split term.cgi output into command output + metadata trailer
+    renderCommandResult: function(text) {
+        var marker = '\n###CPCTERM_META###';
+        var idx = text.lastIndexOf(marker);
+        var output = text, rc = null, newCwd = null;
+        if (idx !== -1) {
+            output = text.slice(0, idx);
+            var meta = text.slice(idx + marker.length);   // "<rc>|<cwd>"
+            var bar = meta.indexOf('|');
+            if (bar !== -1) {
+                rc = meta.slice(0, bar);
+                newCwd = meta.slice(bar + 1);
+            }
+        }
+        if (output.length) {
+            this.appendTerm(output.replace(/\n$/, ''), rc && rc !== '0' ? 'term-err' : null);
+        }
+        if (newCwd) {
+            this.term.cwd = newCwd;
+            this.setTermPrompt();
+        }
     },
 
     // Format uptime

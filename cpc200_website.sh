@@ -22,7 +22,21 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 NEW_WEBSITE_ARCHIVE="$SCRIPT_DIR/new_website.tar.gz"
 BACKUP_ARCHIVE="$SCRIPT_DIR/website_backup.tar.gz"
 SSH_USER="root"
-SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10"
+
+# SSH connection multiplexing: the first connection authenticates (at most one
+# prompt), and every subsequent ssh/scp reuses that socket without re-asking.
+# %C is a short hash of the connection params (keeps the socket path well under
+# the OS unix-socket length limit).
+SSH_CTRL_DIR="/tmp/cpc200_ssh"
+mkdir -p "$SSH_CTRL_DIR" 2>/dev/null || true
+SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ControlMaster=auto -o ControlPath=$SSH_CTRL_DIR/%C -o ControlPersist=300"
+
+# Optional sshpass prefix (set by init_auth). Empty = use ssh's own prompt.
+SSH_AUTH=""
+
+# Wrappers so all ssh/scp calls share the same auth + multiplexed connection.
+do_ssh() { $SSH_AUTH ssh $SSH_OPTS "$@"; }
+do_scp() { $SSH_AUTH scp $SSH_OPTS "$@"; }
 
 # Colors for output
 RED='\033[0;31m'
@@ -56,10 +70,42 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Ask for the password once and cache it for the whole run. Blank is allowed
+# (the adapter's root account commonly has no password). Requires sshpass; if
+# it isn't installed we fall back to connection multiplexing, where ssh prompts
+# at most once and reuses that connection for every later step.
+init_auth() {
+    # Already initialized for this run
+    [ -n "$AUTH_DONE" ] && return 0
+    AUTH_DONE=1
+
+    if command -v sshpass > /dev/null 2>&1; then
+        printf "Password for %s@%s (leave blank if none): " "$SSH_USER" "$1" >&2
+        read -rs PASS
+        echo "" >&2
+        export SSHPASS="$PASS"
+        SSH_AUTH="sshpass -e"
+        print_info "Password cached for this run (sshpass)."
+    else
+        print_info "sshpass not installed — using SSH connection multiplexing."
+        print_info "ssh will prompt at most once, then reuse the connection for all steps."
+        print_info "Blank password: just press Enter at the prompt."
+        print_info "(For fully unattended runs incl. blank passwords: brew install sshpass)"
+    fi
+}
+
+# Close the multiplexed master connection and clean up its socket on exit.
+close_master() {
+    local ip="${IP:-}"
+    [ -n "$ip" ] && ssh $SSH_OPTS -O exit ${SSH_USER}@${ip} 2>/dev/null || true
+    rm -rf "$SSH_CTRL_DIR" 2>/dev/null || true
+}
+
 check_connection() {
     local ip="$1"
+    init_auth "$ip"
     print_info "Checking connection to $ip..."
-    if ! ssh $SSH_OPTS ${SSH_USER}@${ip} "echo 'Connected'" > /dev/null 2>&1; then
+    if ! do_ssh ${SSH_USER}@${ip} "echo 'Connected'" > /dev/null 2>&1; then
         print_error "Cannot connect to ${SSH_USER}@${ip}"
         print_error "Make sure the adapter is powered on and connected to WiFi"
         exit 1
@@ -87,7 +133,7 @@ get_status() {
     echo ""
 
     # Check what's currently installed
-    ssh $SSH_OPTS ${SSH_USER}@${ip} '
+    do_ssh ${SSH_USER}@${ip} '
         echo "Persistent storage (/etc/boa/www):"
         if [ -f /etc/boa/www/js/app.js ]; then
             echo "  -> Replacement website (Vanilla JS)"
@@ -136,10 +182,10 @@ do_install() {
     fi
 
     print_info "Uploading new_website.tar.gz to adapter..."
-    scp $SSH_OPTS "$NEW_WEBSITE_ARCHIVE" ${SSH_USER}@${ip}:/tmp/
+    do_scp "$NEW_WEBSITE_ARCHIVE" ${SSH_USER}@${ip}:/tmp/
 
     print_info "Installing replacement website..."
-    ssh $SSH_OPTS ${SSH_USER}@${ip} '
+    do_ssh ${SSH_USER}@${ip} '
         set -e
 
         echo "Extracting archive..."
@@ -168,6 +214,7 @@ do_install() {
         cp -f /tmp/new_website/etc/boa/cgi-bin/wifi_clients.cgi /etc/boa/cgi-bin/
         cp -f /tmp/new_website/etc/boa/cgi-bin/restart.cgi /etc/boa/cgi-bin/
         cp -f /tmp/new_website/etc/boa/cgi-bin/streamstats.cgi /etc/boa/cgi-bin/
+        cp -f /tmp/new_website/etc/boa/cgi-bin/term.cgi /etc/boa/cgi-bin/
 
         # Set permissions
         chmod 644 /etc/boa/www/index.html
@@ -196,7 +243,7 @@ do_install() {
     print_info "Installation successful!"
     print_info "Rebooting adapter..."
 
-    ssh $SSH_OPTS ${SSH_USER}@${ip} "sync; busybox reboot" || true
+    do_ssh ${SSH_USER}@${ip} "sync; busybox reboot" || true
 
     echo ""
     print_info "Adapter is rebooting. Wait ~30 seconds then access http://${ip}"
@@ -221,10 +268,10 @@ do_restore() {
     fi
 
     print_info "Uploading website_backup.tar.gz to adapter..."
-    scp $SSH_OPTS "$BACKUP_ARCHIVE" ${SSH_USER}@${ip}:/tmp/
+    do_scp "$BACKUP_ARCHIVE" ${SSH_USER}@${ip}:/tmp/
 
     print_info "Restoring OEM website..."
-    ssh $SSH_OPTS ${SSH_USER}@${ip} '
+    do_ssh ${SSH_USER}@${ip} '
         set -e
 
         echo "Extracting archive..."
@@ -240,6 +287,7 @@ do_restore() {
         rm -f /etc/boa/cgi-bin/wifi_clients.cgi 2>/dev/null || true
         rm -f /etc/boa/cgi-bin/restart.cgi 2>/dev/null || true
         rm -f /etc/boa/cgi-bin/streamstats.cgi 2>/dev/null || true
+        rm -f /etc/boa/cgi-bin/term.cgi 2>/dev/null || true
 
         echo "Restoring OEM files..."
         cp -a /tmp/website_backup/etc/boa/www/* /etc/boa/www/
@@ -259,7 +307,7 @@ do_restore() {
     print_info "Restore successful!"
     print_info "Rebooting adapter..."
 
-    ssh $SSH_OPTS ${SSH_USER}@${ip} "sync; busybox reboot" || true
+    do_ssh ${SSH_USER}@${ip} "sync; busybox reboot" || true
 
     echo ""
     print_info "Adapter is rebooting. Wait ~30 seconds then access http://${ip}"
@@ -274,6 +322,9 @@ fi
 
 COMMAND="$1"
 IP="${2:-192.168.43.1}"
+
+# Tear down the multiplexed SSH connection when the script exits.
+trap close_master EXIT
 
 case "$COMMAND" in
     install)

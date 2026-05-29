@@ -30,6 +30,7 @@
             <button class="tab" data-tab="identity">Identity</button>
             <button class="tab" data-tab="info">Info</button>
             <button class="tab" data-tab="config">Config</button>
+            <button class="tab" data-tab="terminal">Terminal</button>
             <button class="tab" data-tab="system">System</button>
         </nav>
 
@@ -370,6 +371,36 @@
                 </div>
             </section>
 
+            <!-- Terminal Tab -->
+            <section id="terminal" class="tab-content">
+                <div class="card">
+                    <div class="config-header">
+                        <h2>Terminal</h2>
+                        <button class="btn btn-sm" onclick="App.clearTerminal()">Clear</button>
+                    </div>
+                    <p class="note">Runs commands as <strong>root</strong> on the adapter via term.cgi. Full shell syntax (pipes, redirects). Working directory persists between commands. Avoid interactive (top, vi) or long-running (ping with no count) commands — there is no live streaming, and a request that never returns is aborted after 60s.</p>
+                    <div id="termWarning" class="term-warning">
+                        <div class="term-warning-icon">&#9888;</div>
+                        <h3>Danger &mdash; Root Shell</h3>
+                        <p>This terminal executes commands as <strong>root</strong> directly on the adapter, with <strong>no sandbox and no undo</strong>. A single mistyped command can corrupt the firmware, erase configuration, brick the adapter, or drop your connection.</p>
+                        <ul>
+                            <li>Commands run immediately &mdash; there is no per-command confirmation.</li>
+                            <li>Destructive operations (<code>rm</code>, <code>dd</code>, <code>mkfs</code>, <code>reboot</code>, killing services) take effect at once.</li>
+                            <li>Only run commands you understand. When in doubt, don't.</li>
+                        </ul>
+                        <button class="btn btn-danger" onclick="App.ackTerminal()">I understand the risk &mdash; Enable Terminal</button>
+                    </div>
+                    <div id="termBody" style="display:none">
+                        <div id="termOutput" class="term-output" aria-live="polite"></div>
+                        <form id="termForm" class="term-input-row" autocomplete="off">
+                            <span class="term-prompt" id="termPrompt">/ #</span>
+                            <input type="text" id="termInput" class="term-input" enterkeyhint="go" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type a command">
+                            <button type="submit" class="btn btn-sm" id="termSend">Run</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
             <!-- System Tab -->
             <section id="system" class="tab-content">
                 <div class="card">
@@ -418,7 +449,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <span>CPC200-CCPA Custom Web Interface v2.1</span>
+            <span>CPC200-CCPA Custom Web Interface v2.5</span>
         </footer>
 
         <!-- Toast Notification -->
